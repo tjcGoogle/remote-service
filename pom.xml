@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github</groupId>
+    <groupId>com.bestv</groupId>
     <artifactId>remote-service</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
 
     <properties>
         <java.version>1.8</java.version>
@@ -25,6 +25,7 @@
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.3.2</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <servlet.api>3.1.0</servlet.api>
     </properties>
 
     <dependencies>
@@ -71,7 +72,6 @@
             <groupId>cn.com.bestv</groupId>
             <artifactId>trace-log</artifactId>
             <version>${tracelog.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
@@ -82,11 +82,18 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
             <version>${spring-data-redis.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${servlet.api}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -98,7 +105,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
-                    <encoding>UTF-8</encoding>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <compilerArgs>
@@ -134,23 +140,6 @@
                         <configuration>
                             <doclint>none</doclint>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- GPG -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>${maven-gpg-plugin.version}</version>
-                <configuration>
-                    <useAgent>false</useAgent>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

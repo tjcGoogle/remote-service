@@ -134,28 +134,25 @@ public class JdkProxyCreators implements ProxyCreators {
      */
     protected void generateServiceCache(Class<?> type, Method method, Map<String, Object> cacheKeyMap, Object result, boolean isFallback) {
         RemoteFunction remoteFunction = method.getAnnotation(RemoteFunction.class);
-        if (remoteFunction != null) {
-            boolean cacheable = remoteFunction.cacheable();
-            // fallback 后结果不入缓存
-            if (cacheable && !isFallback) {
-                // 校验缓存是否存在 , 缓存策略：取 类 + 方法 + 参数 的 hash 值 作为缓存key
-                String paramsDigest = extractParamsDigest(cacheKeyMap);
-                if (StringUtils.isEmpty(paramsDigest)) {
-                    return;
-                }
-                String cacheKey = type.getSimpleName() + "$" + method.getName() + "@" + paramsDigest;
-                @SuppressWarnings("unchecked")
-                RedisTemplate<Object, Object> redisTemplate = SpringContextHolder.getBean(RedisTemplate.class);
-                String expirePropertiesKey = remoteFunction.expireInPropertiesKey();
-                int expireIn;
-                if (StringUtils.isNotEmpty(expirePropertiesKey)) {
-                    String expireInProperties = SpringContextHolder.getRequiredProperty(expirePropertiesKey);
-                    expireIn = Integer.parseInt(expireInProperties);
-                } else {
-                    expireIn = remoteFunction.expireIn();
-                }
-                redisTemplate.opsForValue().set(cacheKey, result, expireIn, TimeUnit.SECONDS);
+        // fallback 后结果不入缓存
+        if (remoteFunction != null && remoteFunction.cacheable() && !isFallback) {
+            // 校验缓存是否存在 , 缓存策略：取 类 + 方法 + 参数 的 hash 值 作为缓存key
+            String paramsDigest = extractParamsDigest(cacheKeyMap);
+            if (StringUtils.isEmpty(paramsDigest)) {
+                return;
             }
+            String cacheKey = type.getSimpleName() + "$" + method.getName() + "@" + paramsDigest;
+            @SuppressWarnings("unchecked")
+            RedisTemplate<Object, Object> redisTemplate = SpringContextHolder.getBean(RedisTemplate.class);
+            String expirePropertiesKey = remoteFunction.expireInPropertiesKey();
+            int expireIn;
+            if (StringUtils.isNotEmpty(expirePropertiesKey)) {
+                String expireInProperties = SpringContextHolder.getRequiredProperty(expirePropertiesKey);
+                expireIn = Integer.parseInt(expireInProperties);
+            } else {
+                expireIn = remoteFunction.expireIn();
+            }
+            redisTemplate.opsForValue().set(cacheKey, result, expireIn, TimeUnit.SECONDS);
         }
     }
 
@@ -168,23 +165,20 @@ public class JdkProxyCreators implements ProxyCreators {
      */
     protected Object attemptLoadCache(Class<?> type, Method method, Map<String, Object> cacheKeyMap) {
         RemoteFunction annotation = method.getAnnotation(RemoteFunction.class);
-        if (annotation != null) {
-            boolean cacheable = annotation.cacheable();
-            if (cacheable) {
-                // 校验缓存是否存在,缓存策略：取 类 + 方法 + 参数 的 摘要 值 作为缓存 key
-                String paramsDigest = extractParamsDigest(cacheKeyMap);
-                if (StringUtils.isEmpty(paramsDigest)) {
-                    return null;
-                }
-                String cacheKey = type.getSimpleName() + "$" + method.getName() + "@" + paramsDigest;
-                @SuppressWarnings("unchecked")
-                RedisTemplate<Object, Object> redisTemplate = SpringContextHolder.getBean(RedisTemplate.class);
-                Object cachedResult = redisTemplate.opsForValue().get(cacheKey);
-                if (cachedResult != null) {
-                    log.info("{} 命中缓存，返回缓存中的结果", type.getSimpleName() + "$" + method.getName());
-                }
-                return cachedResult;
+        if (annotation != null && annotation.cacheable()) {
+            // 校验缓存是否存在,缓存策略：取 类 + 方法 + 参数 的 摘要 值 作为缓存 key
+            String paramsDigest = extractParamsDigest(cacheKeyMap);
+            if (StringUtils.isEmpty(paramsDigest)) {
+                return null;
             }
+            String cacheKey = type.getSimpleName() + "$" + method.getName() + "@" + paramsDigest;
+            @SuppressWarnings("unchecked")
+            RedisTemplate<Object, Object> redisTemplate = SpringContextHolder.getBean(RedisTemplate.class);
+            Object cachedResult = redisTemplate.opsForValue().get(cacheKey);
+            if (cachedResult != null) {
+                log.info("{} 命中缓存，返回缓存中的结果", type.getSimpleName() + "$" + method.getName());
+            }
+            return cachedResult;
         }
         return null;
     }

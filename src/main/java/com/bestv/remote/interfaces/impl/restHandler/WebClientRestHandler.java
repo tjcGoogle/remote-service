@@ -7,7 +7,7 @@ import com.bestv.remote.interfaces.RestHandler;
 
 /**
  * spring5 webClient 调用远程服务
- * todo 异步非阻塞
+ * todo
  *
  * @author taojiacheng
  */
