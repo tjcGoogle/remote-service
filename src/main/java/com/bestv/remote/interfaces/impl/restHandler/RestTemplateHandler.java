@@ -157,6 +157,9 @@ public class RestTemplateHandler implements RestHandler {
         traceLogBean.setMethod(httpMethod.name());
 
         TraceLogContext traceLogContext = TraceLogContextHolder.getTraceLogContext();
+        if (traceLogContext == null) {
+            traceLogContext = new TraceLogContext();
+        }
         traceLogBean.setSn(traceLogContext.getSn());
         traceLogBean.setTargetServerIp(serverContext.getBaseUrl());
         traceLogBean.setTargetApi(URLUtil.getPath(URLUtil.normalize(methodContext.getFinalUrl())));
