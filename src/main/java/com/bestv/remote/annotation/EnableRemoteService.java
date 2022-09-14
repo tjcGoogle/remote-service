@@ -1,7 +1,6 @@
 package com.bestv.remote.annotation;
 
 import com.bestv.remote.configuration.RemoteServiceRegistrar;
-import com.bestv.remote.trace.TraceLogInterceptorAdapter;
 import com.bestv.remote.utils.SpringContextHolder;
 import org.springframework.context.annotation.Import;
 
@@ -15,7 +14,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({RemoteServiceRegistrar.class, TraceLogInterceptorAdapter.class, SpringContextHolder.class})
+@Import({RemoteServiceRegistrar.class, SpringContextHolder.class})
 public @interface EnableRemoteService {
 
     /**

@@ -3,6 +3,7 @@ package com.bestv.remote.configuration;
 import com.bestv.remote.annotation.EnableRemoteService;
 import com.bestv.remote.annotation.RemoteService;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -18,6 +19,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +50,7 @@ public class RemoteServiceRegistrar implements ImportBeanDefinitionRegistrar {
                 String className = beanDefinitionMeta.getClassName();
                 Assert.isTrue(beanDefinitionMeta.isInterface(), "@RemoteService 只能标记 interface");
                 Map<String, Object> attributes = beanDefinitionMeta.getAnnotationAttributes(RemoteService.class.getCanonicalName());
+                attributes = attributes == null ? new HashMap<>() : attributes;
                 registerRemoteService(registry, className, attributes);
             }
         }
@@ -96,7 +99,7 @@ public class RemoteServiceRegistrar implements ImportBeanDefinitionRegistrar {
     protected ClassPathScanningCandidateComponentProvider getScanner() {
         return new ClassPathScanningCandidateComponentProvider(false) {
             @Override
-            protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+            protected boolean isCandidateComponent(@NotNull AnnotatedBeanDefinition beanDefinition) {
                 boolean isCandidate = false;
                 if (beanDefinition.getMetadata().isIndependent()) {
                     if (!beanDefinition.getMetadata().isAnnotation()) {

@@ -101,17 +101,12 @@ public @interface RemoteFunction {
 
 
     /**
-     * 配置文件中所配置的缓存时间的key
-     * 此配置优先读取，不存在时取 expireIn
-     */
-    String expireInPropertiesKey() default "";
-
-
-    /**
-     * 缓存时间 秒
+     * 缓存时间 (秒)
      * 默认 1 小时
+     * <p>
+     * 如果想再配置文件中配置，使用 ${配置文件中的key}
      */
-    int expireIn() default 60 * 60;
+    String expireIn() default "3600";
 
 
     interface None extends FallbackHandler<Object>, BlockHandler<Object> {

@@ -144,15 +144,16 @@ public class JdkProxyCreators implements ProxyCreators {
             String cacheKey = type.getSimpleName() + "$" + method.getName() + "@" + paramsDigest;
             @SuppressWarnings("unchecked")
             RedisTemplate<Object, Object> redisTemplate = SpringContextHolder.getBean(RedisTemplate.class);
-            String expirePropertiesKey = remoteFunction.expireInPropertiesKey();
-            int expireIn;
-            if (StringUtils.isNotEmpty(expirePropertiesKey)) {
-                String expireInProperties = SpringContextHolder.getRequiredProperty(expirePropertiesKey);
-                expireIn = Integer.parseInt(expireInProperties);
-            } else {
-                expireIn = remoteFunction.expireIn();
+            String expireIn = remoteFunction.expireIn().trim();
+            if (expireIn.startsWith(PLACE_HOLDER_PREFIX)) {
+                String propertiesKey = extractPlaceHolder(expireIn);
+                expireIn = StringUtils.trim(SpringContextHolder.getRequiredProperty(propertiesKey));
+                if (!NumberUtil.isNumber(expireIn)) {
+                    throw new IllegalArgumentException("expireIn must be number");
+                }
             }
-            redisTemplate.opsForValue().set(cacheKey, result, expireIn, TimeUnit.SECONDS);
+            int expire = Integer.parseInt(expireIn);
+            redisTemplate.opsForValue().set(cacheKey, result, expire, TimeUnit.SECONDS);
         }
     }
 
@@ -176,7 +177,7 @@ public class JdkProxyCreators implements ProxyCreators {
             RedisTemplate<Object, Object> redisTemplate = SpringContextHolder.getBean(RedisTemplate.class);
             Object cachedResult = redisTemplate.opsForValue().get(cacheKey);
             if (cachedResult != null) {
-                log.info("{} 命中缓存，返回缓存中的结果", type.getSimpleName() + "$" + method.getName());
+                log.info("{} Hit the cache and return the result in the cache ", type.getSimpleName() + "$" + method.getName());
             }
             return cachedResult;
         }
@@ -293,16 +294,17 @@ public class JdkProxyCreators implements ProxyCreators {
         // 执行降级方法
         FallbackHandler<?> fallbackHandler = SpringContextHolder.getBean(fallbackClass);
         for (Class<? extends Throwable> fallbackException : methodContext.getFallbackFor()) {
-            if (fallbackException.isAssignableFrom(e.getClass())) {
-                try {
-                    // 执行降级方法
-                    log.info("Execute the downgrade method : {}", fallbackClass.getSimpleName());
-                    methodContext.setHasFallback(true);
-                    return fallbackHandler.handlerFallback(serverContext, methodContext, paramContext, e);
-                } catch (Throwable throwable) {
-                    log.error("Failed to execute the degraded method : {}", throwable.getMessage(), throwable);
-                    throw throwable;
-                }
+            if (!fallbackException.isAssignableFrom(e.getClass())) {
+                continue;
+            }
+            try {
+                // 执行降级方法
+                log.info("Execute the downgrade method : {}", fallbackClass.getSimpleName());
+                methodContext.setHasFallback(true);
+                return fallbackHandler.handlerFallback(serverContext, methodContext, paramContext, e);
+            } catch (Throwable throwable) {
+                log.error("Failed to execute the degraded method : {}", throwable.getMessage(), throwable);
+                throw throwable;
             }
         }
         // 没有捕获到降级异常 不进行降级处理
@@ -327,7 +329,6 @@ public class JdkProxyCreators implements ProxyCreators {
             if (remoteParam == null) {
                 continue;
             }
-            // 参数名,默认取形参名
             String name = StringUtils.isNotEmpty(remoteParam.value()) ? remoteParam.value() : parameter.getName();
             switch (remoteParam.type()) {
                 case BASE_URL:
@@ -484,7 +485,7 @@ public class JdkProxyCreators implements ProxyCreators {
         }
         if (!CollectionUtils.isEmpty(constraintViolations)) {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("方法 ").append(method.getDeclaringClass())
+            stringBuilder.append("Method ").append(method.getDeclaringClass())
                     .append("$")
                     .append(method.getName())
                     .append(" ")
@@ -493,7 +494,7 @@ public class JdkProxyCreators implements ProxyCreators {
                     stringBuilder
                             .append("「")
                             .append(key)
-                            .append(" 校验失败, 原因: ")
+                            .append(" Verification failed because of: ")
                             .append(val)
                             .append("」")
                             .append(" ")

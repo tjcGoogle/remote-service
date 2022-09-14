@@ -90,7 +90,7 @@ public class RestTemplateHandler implements RestHandler {
         // 构建请求头信息
         HttpHeaders httpHeaders = buildRequestHeaders(paramContext);
         String finalUrl = buildFinalUrl(methodContext, paramContext);
-        log.info("do httpClient request, finalUrl : {}", finalUrl);
+        log.info("do http request, finalUrl : {}", finalUrl);
         // 执行请求
         HttpMethod httpMethod = methodContext.getHttpMethod();
         // 请求链路
