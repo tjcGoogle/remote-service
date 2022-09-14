@@ -16,9 +16,9 @@ import java.lang.annotation.*;
 public @interface RemoteParam {
 
     /**
-     * 参数名 不指定取形参名
+     * 参数名称
      */
-    String value() default "";
+    String name();
 
     /**
      * 参数类型

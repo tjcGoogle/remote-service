@@ -35,7 +35,7 @@ public enum ParamType {
      * <p>
      * 注： json 和 form 只能同时存在1个
      */
-    JSON,
+    JSON_BODY,
 
     /**
      * 请求体 body form

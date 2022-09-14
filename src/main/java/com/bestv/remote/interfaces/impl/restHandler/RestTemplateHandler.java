@@ -178,8 +178,9 @@ public class RestTemplateHandler implements RestHandler {
         String baseUrl = paramContext.getBaseUrl();
         if (StringUtils.isEmpty(baseUrl)) {
             // 优先取参数中传递的baseUrl
-            baseUrl = serverContext.getBaseUrl();
+            serverContext.setBaseUrl(baseUrl);
         }
+        baseUrl = serverContext.getBaseUrl();
         if (StringUtils.isEmpty(baseUrl)) {
             throw new Http4xxException("baseUrl is empty");
         }

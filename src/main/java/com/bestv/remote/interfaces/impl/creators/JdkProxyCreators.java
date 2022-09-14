@@ -329,12 +329,10 @@ public class JdkProxyCreators implements ProxyCreators {
             if (remoteParam == null) {
                 continue;
             }
-            String name = StringUtils.isNotEmpty(remoteParam.value()) ? remoteParam.value() : parameter.getName();
+            String name = StringUtils.isNotEmpty(remoteParam.name()) ? remoteParam.name() : parameter.getName();
             switch (remoteParam.type()) {
                 case BASE_URL:
-                    if (args[i] != null && String.valueOf(args[i]).startsWith("http")) {
-                        paramContext.setBaseUrl((String) args[i]);
-                    }
+                    paramContext.setBaseUrl((String) args[i]);
                     break;
                 case PATH:
                     extractParamsToMap(paramContext.getPathParams(), name, args[i]);
@@ -346,7 +344,7 @@ public class JdkProxyCreators implements ProxyCreators {
                     mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
                     extractParamsToMap(paramContext.getRequestBody(), name, args[i]);
                     break;
-                case JSON:
+                case JSON_BODY:
                     mediaType = MediaType.APPLICATION_JSON_VALUE;
                     extractParamsToMap(paramContext.getRequestBody(), name, args[i]);
                     break;
